@@ -1,0 +1,134 @@
+#! /usr/bin/env bash
+
+# Basic info
+HOSTNAME=`uname -n`
+ROOT=`df -kh / | awk '/[0-9]%/{print $(NF-2)}'`
+DISK_USAGE=`df -kh / | awk '/[0-9]%/{print $(NF-1)}'`
+INODE_USAGE=`df -ih / | awk '/[0-9]%/{print $(NF-1)}'`
+# System load
+MEMORY1=`free -t -m | grep Total | awk '{print $3" MB";}'`
+MEMORY2=`free -t -m | grep "Mem" | awk '{print $2" MB";}'`
+LOAD1=`cat /proc/loadavg | awk {'print $1'}`
+LOAD5=`cat /proc/loadavg | awk {'print $2'}`
+LOAD15=`cat /proc/loadavg | awk {'print $3'}`
+IP_Address_Count=`ifconfig | grep "inet addr" | grep -v "127.0.0.1" | wc -l`
+case $IP_Address_Count in 
+	1 ) IP_1=`ifconfig | grep "inet addr" | awk '{print $2}' | sed 's/addr://g' | head -1 | tail -1`
+		INTERFACE_1=`ifconfig | grep Link | grep -v inet6 | awk '{print $1}' | head -1 | tail -1`
+		IP_2="none"
+		INTERFACE_2="none"
+		IP_3="none"
+		INTERFACE_3="none"
+		;;
+	2 ) IP_1=`ifconfig | grep "inet addr" | awk '{print $2}' | sed 's/addr://g' | head -1 | tail -1`
+		INTERFACE_1=`ifconfig | grep Link | grep -v inet6 | awk '{print $1}' | head -1 | tail -1`
+		IP_2=`ifconfig | grep "inet addr" | awk '{print $2}' | sed 's/addr://g' | head -2 | tail -1`
+		INTERFACE_2=`ifconfig | grep Link | grep -v inet6 | awk '{print $1}' | head -2 | tail -1`
+		IP_3="none"
+		INTERFACE_3="none"
+		;;
+	3 ) IP_1=`ifconfig | grep "inet addr" | awk '{print $2}' | sed 's/addr://g' | head -1 | tail -1`
+		INTERFACE_1=`ifconfig | grep Link | grep -v inet6 | awk '{print $1}' | head -1 | tail -1`
+		IP_2=`ifconfig | grep "inet addr" | awk '{print $2}' | sed 's/addr://g' | head -2 | tail -1`
+		INTERFACE_2=`ifconfig | grep Link | grep -v inet6 | awk '{print $1}' | head -2 | tail -1`
+		IP_3=`ifconfig | grep "inet addr" | awk '{print $2}' | sed 's/addr://g' | head -3 | tail -1`
+		INTERFACE_3=`ifconfig | grep Link | grep -v inet6 | awk '{print $1}' | head -3 | tail -1`
+		;;
+	0 ) IP_1="none"
+		IP_2="none"
+		IP_3="none"
+		;;
+esac
+
+echo "==================================================================
+ - Hostname..............: $HOSTNAME
+ - IP....................: $IP_1 ($INTERFACE_1)
+ - IP....................: $IP_2 ($INTERFACE_2)
+ - IP....................: $IP_3 ($INTERFACE_3)
+==================================================================
+ - Disk Space............: $ROOT remained
+ - Disk Usage............: $DISK_USAGE
+ - INode Usage...........: $INODE_USAGE
+ - CPU usage.............: $LOAD1, $LOAD5, $LOAD15 (1, 5, 15 min)
+ - Memory usage..........: $MEMORY1 / $MEMORY2
+ - Swap in use...........: `free -m | tail -n 1 | awk '{print $3}'` MB
+=================================================================="
+
+#echo "-------------Service Control---------------"
+var1=`systemctl | grep mysql | grep "active running" | wc -l`
+#echo " - MYSQL...............................................: "$var1
+var2=`systemctl | grep rabbitmq | grep "active running" | wc -l`
+#echo " - RABBITMQ............................................: "$var2
+var3=`systemctl | grep memcached | grep "active running" | wc -l`
+#echo " - MEMCACHED...........................................: "$var3
+var4=`systemctl | grep etcd | grep "active running" | wc -l`
+#echo " - ETCD................................................: "$var4
+var5=`ps -ef | grep keystone | grep -v grep | grep "wsgi:keystone-pu -k start"| wc -l`
+#echo " - KEYSTONE............................................: "$var5
+var6=`systemctl | grep apache2 | grep "active running" | wc -l`
+#echo " - APACHE2.............................................: "$var6
+var7=`systemctl | grep glance-api | grep "active running" | wc -l`
+#echo " - GLANCE-API..........................................: "$var7
+var8=`systemctl | grep glance-registry | grep "active running" | wc -l`
+#echo " - GLANCE-REGISTRY.....................................: "$var8
+var9=`systemctl | grep nova-api | grep "active running" | wc -l`
+#echo " - NOVA-API............................................: "$var9
+var10=`systemctl | grep nova-conductor | grep "active running" | wc -l`
+#echo " - NOVA-CONDUCTOR......................................: "$var10
+var11=`systemctl | grep nova-consoleauth | grep "active running" | wc -l`
+#echo " - NOVA-CONSOLEAUTH....................................: "$var11
+var12=`systemctl | grep nova-novncproxy | grep "active running" | wc -l`
+#echo " - NOVA-NOVNCPROXY.....................................: "$var12
+var13=`systemctl | grep nova-scheduler | grep "active running" | wc -l`
+#echo " - NOVA-SCHEDULER......................................: "$var13
+var14=`systemctl | grep nova-compute | grep "active running" | wc -l`
+#echo " - NOVA-COMPUTE........................................: "$var14
+var15=`systemctl | grep neutron-linuxbridge-agent | grep "active running" | wc -l`
+#echo " - NEUTRON-LINUXBRIDGE-AGENT...........................: "$var15
+var16=`systemctl | grep neutron-dhcp-agent | grep "active running" | wc -l`
+#echo " - NEUTRON-DHCP-AGENT..................................: "$var16
+var17=`systemctl | grep neutron-l3-agent | grep "active running" | wc -l`
+#echo " - NEUTRON-L3-AGENT....................................: "$var17
+var18=`systemctl | grep neutron-metadata-agent | grep "active running" | wc -l`
+#echo " - NEUTRON-METADATA-AGENT..............................: "$var18
+var19=`systemctl | grep neutron-server | grep "active running" | wc -l`
+#echo " - NEUTRON-SERVER......................................: "$var19
+var20=`systemctl | grep neutron-linuxbridge-cleanup | grep "active running" | wc -l`
+#echo " - NEUTRON-LINUXBRIDGE-CLEANUP.........................: "$var20
+var21=`systemctl | grep cinder-scheduler | grep "active running" | wc -l`
+#echo " - CINDER-SCHEDULER....................................: "$var21
+var22=`systemctl | grep cinder-volume | grep "active running" | wc -l`
+#echo " - CINDER-VOLUME.......................................: "$var22
+var23=`systemctl | grep tgt | grep "active running" | wc -l`
+#echo " - TGT.................................................: "$var23
+var24=`systemctl | grep swift-proxy | grep "active running" | wc -l`
+#echo " - SWIFT-PROXY.........................................: "$var24
+var25=`systemctl | grep cinder-backup | grep "active running" | wc -l`
+#echo " - CINDER_BACKUP.......................................: "$var24
+#echo "__________________________________________________________________"
+
+echo "+--------------------------------+--------------------------------+--------------------------------+"
+echo "| MYSQL                        "$var1" | RABBITMQ                     "$var2" | MEMCACHED                    "$var3" |"
+echo "+--------------------------------+--------------------------------+--------------------------------+"
+echo "| ETCD                         "$var4" | KEYSTONE                     "$var5" | APACHE2                      "$var6" |"
+echo "+--------------------------------+--------------------------------+--------------------------------+"
+echo "| GLANCE-API                   "$var7" | GLANCE-REGISTRY              "$var8" | NOVA-API                     "$var9" |"
+echo "+--------------------------------+--------------------------------+--------------------------------+"
+echo "| NOVA-CONDUCTOR               "$var10" | NOVA-CONSOLEAUTH             "$var11" | NOVA-NOVNCPROXY              "$var12" |"
+echo "+--------------------------------+--------------------------------+--------------------------------+"
+echo "| NOVA-SCHEDULER               "$var13" | NOVA-COMPUTE                 "$var14" | NEUTRON-LINUXBRIDGE-AGENT    "$var15" |"
+echo "+--------------------------------+--------------------------------+--------------------------------+"
+echo "| NEUTRON-DHCP-AGENT           "$var16" | NEUTRON-L3-AGENT             "$var17" | NEUTRON-METADATA-AGENT       "$var18" |"
+echo "+--------------------------------+--------------------------------+--------------------------------+"
+echo "| NEUTRON-SERVER               "$var19" | NEUTRON-LINUXBRIDGE-CLEANUP  "$var20" | CINDER-SCHEDULER             "$var21" |"
+echo "+--------------------------------+--------------------------------+--------------------------------+"
+echo "| CINDER-VOLUME                "$var22" | TGT                          "$var23" | SWIFT-PROXY                  "$var24" |"
+echo "+--------------------------------+--------------------------------+--------------------------------+"
+echo "| CINDER-BACKUP                "$var25" |--------------------------------|--------------------------------|"
+echo "+--------------------------------+--------------------------------+--------------------------------+"
+
+
+
+
+
+
