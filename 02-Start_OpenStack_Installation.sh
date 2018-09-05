@@ -65,8 +65,8 @@ while true; do
     read -p " > do you wish to install MariaDB-Server [y/n]: " yn
     case $yn in
         [Yy]* ) 
-				read -p "  > mariadb-server and python-pymysql packages will be installed. OK?" OK
-				apt -y install mariadb-server python-pymysql
+				read -p "  > 'mariadb-server', 'mytop' and 'python-pymysql' packages will be installed. OK?" OK
+				apt -y install mariadb-server python-pymysql mytop
 				break;;
         [Nn]* ) 
                 echo "Installation Aborted"
